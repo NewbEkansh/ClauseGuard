@@ -1,0 +1,1 @@
+from backend.models.clause import Clause
