@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 import uuid
 from backend.models.db import Base
-
+from sqlalchemy import Column, Float
 class Contract(Base):
     __tablename__ = "contracts"
 
@@ -11,3 +11,4 @@ class Contract(Base):
     file_url = Column(String, nullable=False)
     status = Column(String, default="processing")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    risk_score = Column(Float, nullable=True)

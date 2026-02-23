@@ -4,7 +4,7 @@ from backend.api.upload import router as upload_router
 from backend.models.clause import Clause
 from backend.api.analysis import router as analysis_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from backend.api.contracts import router as contracts_router
 
 app = FastAPI()
 app.add_middleware(
@@ -18,7 +18,7 @@ app.include_router(analysis_router)
 
 Base.metadata.create_all(bind=engine)
 app.include_router(upload_router)
-
+app.include_router(contracts_router)
 @app.get("/")
 def root():
     return {"message": "ClauseGuard API Running"}
