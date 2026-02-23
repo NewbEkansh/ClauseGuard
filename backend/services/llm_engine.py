@@ -21,30 +21,35 @@ def extract_risk_clauses(contract_text: str):
         }
 
     prompt = f"""
-You are an expert legal contract analyst.
+You are an expert legal contract risk analyst.
 
-Analyze the contract carefully.
+For each clause below:
+1. Extract the exact clause text (or null if not present).
+2. Assign a risk_level: Low, Medium, or High.
+3. Explain why it may be risky.
+4. Provide a real-world scenario explaining the risk exposure.
+5. Suggest a safer alternative rewrite.
 
-If a clause exists, extract its exact wording.
-If it does not exist, return null.
+Clauses to analyze:
+- termination
+- indemnity
+- liability
+- non_compete
 
-Extract:
-
-1. termination_clause
-2. indemnity_clause
-3. liability_clause
-4. non_compete_clause
-
-Also assign a risk_score from 0 to 100 based on overall legal risk exposure.
-
-Return ONLY valid JSON in this format:
+Return ONLY valid JSON in this exact format:
 
 {{
-  "termination_clause": string | null,
-  "indemnity_clause": string | null,
-  "liability_clause": string | null,
-  "non_compete_clause": string | null,
-  "risk_score": integer
+  "termination": {{
+    "text": string | null,
+    "risk_level": "Low | Medium | High",
+    "why_risky": string,
+    "scenario_analysis": string,
+    "suggested_rewrite": string
+  }},
+  "indemnity": {{ ... }},
+  "liability": {{ ... }},
+  "non_compete": {{ ... }},
+  "overall_risk_score": integer
 }}
 
 Contract:

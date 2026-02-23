@@ -39,11 +39,8 @@ def analyze_contract(contract_id: str):
         # STEP 4 — Persist AI output
         clause_entry = Clause(
             contract_id=contract.id,
-            termination_clause=ai_result.get("termination_clause"),
-            indemnity_clause=ai_result.get("indemnity_clause"),
-            liability_clause=ai_result.get("liability_clause"),
-            non_compete_clause=ai_result.get("non_compete_clause"),
-            risk_score=ai_result.get("risk_score"),
+            risk_score=ai_result.get("overall_risk_score"),
+            analysis_json=ai_result,
         )
 
         db.add(clause_entry)
