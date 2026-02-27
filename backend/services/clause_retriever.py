@@ -7,18 +7,7 @@ KEYWORDS = {
     "liability": ["liability", "limitation of liability", "damages"],
     "non_compete": ["non-compete", "non compete", "restrict competition"]
 }
-RED_FLAG_KEYWORDS = [
-    "sole discretion",
-    "without notice",
-    "unlimited liability",
-    "perpetual",
-    "irrevocable",
-    "indemnify and hold harmless",
-    "no liability",
-    "exclusive remedy"
-]
 
-RED_FLAG_BOOST = 10
 
 def split_into_sections(text: str):
     # Split by numbered headings like 1., 2., 3.

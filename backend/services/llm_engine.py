@@ -12,21 +12,53 @@ RISK_MAP = {
     "High": 80,
     "Extreme": 95
 }
+RED_FLAG_KEYWORDS = [
+    "sole discretion",
+    "without notice",
+    "unlimited liability",
+    "perpetual",
+    "irrevocable",
+    "indemnify and hold harmless",
+    "no liability",
+    "exclusive remedy"
+]
 
+RED_FLAG_BOOST = 10
+
+def detect_red_flags(text: str):
+    if not text:
+        return 0
+
+    text_lower = text.lower()
+    boost = 0
+
+    for keyword in RED_FLAG_KEYWORDS:
+        if keyword in text_lower:
+            boost += RED_FLAG_BOOST
+
+    return boost
 
 def normalize_clause(clause_data):
     if not clause_data:
         return None
 
     risk_level = clause_data.get("risk_level", "Low")
+    base_score = RISK_MAP.get(risk_level, 20)
+
+    text = clause_data.get("text")
+
+    red_flag_bonus = detect_red_flags(text)
+
+    final_score = min(base_score + red_flag_bonus, 100)
 
     return {
-        "text": clause_data.get("text"),
+        "text": text,
         "risk_level": risk_level,
         "why_risky": clause_data.get("why_risky"),
         "scenario_analysis": clause_data.get("scenario_analysis"),
         "suggested_rewrite": clause_data.get("suggested_rewrite"),
-        "score": RISK_MAP.get(risk_level, 20)
+        "score": final_score,
+        "red_flag_bonus": red_flag_bonus
     }
 
 
@@ -41,6 +73,23 @@ def calculate_overall_score(clauses):
 
     return int(sum(scores) / len(scores))
 
+def detect_asymmetry(termination, indemnity, liability):
+    asymmetry_boost = 0
+
+    if indemnity and liability:
+        indemnity_text = indemnity["text"].lower() if indemnity["text"] else ""
+        liability_text = liability["text"].lower() if liability["text"] else ""
+
+        if "indemnify" in indemnity_text and "limit" in liability_text:
+            asymmetry_boost += 10
+
+    if termination:
+        termination_text = termination["text"].lower() if termination["text"] else ""
+
+        if "sole discretion" in termination_text:
+            asymmetry_boost += 10
+
+    return asymmetry_boost
 
 def extract_risk_clauses(contract_text: str):
 
@@ -108,6 +157,12 @@ Contract:
             liability,
             non_compete
         ])
+        asymmetry_boost = detect_asymmetry(
+            termination,
+            indemnity,
+            liability
+        )
+        overall_score=min(overall_score + asymmetry_boost, 100)
 
         return {
             "overall_risk_score": overall_score,
@@ -119,10 +174,10 @@ Contract:
 
     except Exception as e:
         return {
-            "overall_risk_score": 0,
-            "termination_clause": None,
-            "indemnity_clause": None,
-            "liability_clause": None,
-            "non_compete_clause": None,
-            "error": str(e)
+        "overall_risk_score": overall_score,
+        "asymmetry_bonus": asymmetry_bonus,
+        "termination_clause": termination,
+        "indemnity_clause": indemnity,
+        "liability_clause": liability,
+        "non_compete_clause": non_compete
         }
