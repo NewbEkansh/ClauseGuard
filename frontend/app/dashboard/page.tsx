@@ -18,7 +18,7 @@ export default function Dashboard() {
   // ==============================
   const fetchContracts = async () => {
     try {
-      const res = await fetch("http://localhost:8080/contracts")
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contracts`)
       const json = await res.json()
       setContracts(json)
     } catch (err) {
@@ -33,7 +33,7 @@ export default function Dashboard() {
     fetchContracts()
 
     const interval = setInterval(async () => {
-      const res = await fetch("http://localhost:8080/contracts")
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contracts`)
       const json = await res.json()
       setContracts(json)
 
@@ -60,7 +60,7 @@ export default function Dashboard() {
       const formData = new FormData()
       formData.append("file", file)
 
-      await fetch("http://localhost:8080/upload", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
         method: "POST",
         body: formData,
       })
@@ -162,7 +162,11 @@ export default function Dashboard() {
 
         <button
           onClick={() => setSortByRisk(!sortByRisk)}
-          className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition"
+          className={`px-4 py-2 rounded-lg transition font-medium
+            ${sortByRisk
+              ? "bg-blue-600 shadow-blue-500/30 shadow-md"
+              : "bg-slate-800 hover:bg-slate-700"}
+          `}
         >
           {sortByRisk ? "Sorted by Risk ✓" : "Sort by Risk"}
         </button>

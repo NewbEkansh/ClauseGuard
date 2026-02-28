@@ -2,57 +2,86 @@ from backend.celery_worker import celery
 from backend.models.db import SessionLocal
 from backend.models.contract import Contract
 from backend.models.clause import Clause
+from backend.services.audit_service import log_event
 from backend.services.pdf_parser import extract_text_from_pdf
 from backend.services.llm_engine import extract_risk_clauses
 from backend.services.clause_retriever import find_relevant_sections
 
+from celery.utils.log import get_task_logger
 
-@celery.task
-def analyze_contract(contract_id: str):
+logger = get_task_logger(__name__)
 
-    # --------------------------------------------
-    # Create DB session inside Celery worker
-    # --------------------------------------------
+
+@celery.task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_backoff_max=600,
+    retry_kwargs={"max_retries": 3}
+)
+def analyze_contract(self, contract_id: str):
+
     db = SessionLocal()
 
     try:
-        # --------------------------------------------
-        # STEP 0 — Fetch contract
-        # --------------------------------------------
+        logger.info(f"Starting analysis for {contract_id}")
+
         contract = db.query(Contract).filter(Contract.id == contract_id).first()
 
         if not contract:
+            logger.error(f"Contract {contract_id} not found")
             return "Contract not found"
 
         # --------------------------------------------
-        # STEP 1 — Extract full contract text
+        # RETRY LOGGING
+        # --------------------------------------------
+        if self.request.retries > 0:
+            log_event(
+                db,
+                contract.id,
+                "analysis_retry",
+                "retrying",
+                f"Retry attempt {self.request.retries}"
+            )
+
+        # --------------------------------------------
+        # AUDIT — started
+        # --------------------------------------------
+        log_event(
+            db,
+            contract.id,
+            "analysis_started",
+            "processing",
+            "Contract analysis started"
+        )
+
+        # --------------------------------------------
+        # STEP 1 — Extract text
         # --------------------------------------------
         full_text = extract_text_from_pdf(contract.file_url)
-        print("Full Text Preview:", full_text[:1000])
 
         # --------------------------------------------
-        # STEP 2 — Retrieve only relevant sections
+        # STEP 2 — Relevant sections
         # --------------------------------------------
         relevant_text = find_relevant_sections(full_text)
-        print("Relevant Text Preview:", relevant_text[:1000])
 
-        # Safety fallback (if keyword search fails)
         if not relevant_text.strip():
-            print("No relevant sections found — using full text.")
+            logger.warning(f"No relevant sections found for {contract_id}")
             relevant_text = full_text
 
         # --------------------------------------------
-        # STEP 3 — Run AI on relevant text
+        # STEP 3 — AI
         # --------------------------------------------
         ai_result = extract_risk_clauses(relevant_text)
-        print("AI Result:", ai_result)
+
+        if not isinstance(ai_result, dict):
+            raise ValueError("AI returned invalid format")
 
         overall_score = ai_result.get("overall_risk_score", 0)
 
         # --------------------------------------------
-        # STEP 4 — Persist / Update Clause row
+        # STEP 4 — Persist Clause
         # --------------------------------------------
-
         existing_clause = (
             db.query(Clause)
             .filter(Clause.contract_id == contract.id)
@@ -60,11 +89,9 @@ def analyze_contract(contract_id: str):
         )
 
         if existing_clause:
-            # Update existing analysis
             existing_clause.risk_score = overall_score
             existing_clause.analysis_json = ai_result
         else:
-            # Create new analysis entry
             clause_entry = Clause(
                 contract_id=contract.id,
                 risk_score=overall_score,
@@ -73,28 +100,49 @@ def analyze_contract(contract_id: str):
             db.add(clause_entry)
 
         # --------------------------------------------
-        # STEP 5 — Update Contract table
+        # STEP 5 — Update Contract
         # --------------------------------------------
         contract.status = "completed"
-
-        # 🔥 THIS FIXES YOUR NULL ISSUE
         contract.risk_score = overall_score
 
         db.commit()
 
+        # --------------------------------------------
+        # AUDIT — success
+        # --------------------------------------------
+        log_event(
+            db,
+            contract.id,
+            "analysis_completed",
+            "success",
+            f"Analysis completed with score {overall_score}"
+        )
+
+        logger.info(f"Completed analysis for {contract_id}")
         return "Analysis completed"
 
     except Exception as e:
 
         db.rollback()
 
-        # Mark contract as failed
+        logger.error(f"Error analyzing {contract_id}: {str(e)}")
+
         contract = db.query(Contract).filter(Contract.id == contract_id).first()
         if contract:
             contract.status = "failed"
             db.commit()
 
-        print("AI Error:", str(e))
+        # --------------------------------------------
+        # AUDIT — failure
+        # --------------------------------------------
+        log_event(
+            db,
+            contract_id,
+            "analysis_failed",
+            "error",
+            str(e)
+        )
+
         raise e
 
     finally:
