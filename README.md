@@ -38,11 +38,16 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
 DATABASE_URL=postgresql://...
 REDIS_URL=redis://localhost:6379/0
-GROQ_API_KEY=your_key
-JWT_SECRET=your_secret
-DEV_MODE=true
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.3-70b-versatile
+DEV_MODE=false
+JWT_SECRET=your_jwt_secret
+ADMIN_USERNAME=your_admin_username
+ADMIN_PASSWORD=your_admin_password
 ```
 
 ### Start Services
