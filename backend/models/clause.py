@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSON
-from models.db import Base
+from backend.models.db import Base
 import uuid
 
 

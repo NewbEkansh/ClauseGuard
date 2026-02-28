@@ -1,1 +1,1 @@
-from models.clause import Clause
+from backend.models.clause import Clause

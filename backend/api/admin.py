@@ -3,11 +3,11 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional
-from models.db import SessionLocal
-from models.contract import Contract
-from models.audit_log import AuditLog
-from services.auth_service import verify_token
-from models.clause import Clause
+from backend.models.db import SessionLocal
+from backend.models.contract import Contract
+from backend.models.audit_log import AuditLog
+from backend.services.auth_service import verify_token
+from backend.models.clause import Clause
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 

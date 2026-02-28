@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.auth_service import authenticate_admin, create_access_token
+from backend.services.auth_service import authenticate_admin, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

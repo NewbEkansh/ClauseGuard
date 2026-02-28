@@ -17,7 +17,7 @@ export default function AnalysisPage() {
 
     async function fetchData() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analysis/${id}`)
+        const res = await fetch(`http://localhost:8080/analysis/${id}`)
 
         if (!res.ok) {
           if (res.status === 404) {
@@ -76,7 +76,7 @@ export default function AnalysisPage() {
   // Download PDF report from backend
   const downloadPDF = () => {
     if (!id) return
-    window.open(`${process.env.NEXT_PUBLIC_API_URL}/analysis/${id}/report`, "_blank")
+    window.open(`http://localhost:8080/analysis/${id}/report`, "_blank")
   }
 
   // Loading screen

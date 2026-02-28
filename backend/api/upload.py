@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File
-from models.db import SessionLocal
-from models.contract import Contract
-from tasks.analyze_contract import analyze_contract
+from backend.models.db import SessionLocal
+from backend.models.contract import Contract
+from backend.tasks.analyze_contract import analyze_contract
 import os
 import uuid
 

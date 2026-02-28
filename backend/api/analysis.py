@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from models.db import SessionLocal
-from models.clause import Clause
-from models.contract import Contract
+from backend.models.db import SessionLocal
+from backend.models.clause import Clause
+from backend.models.contract import Contract
 from fastapi.responses import StreamingResponse
-from services.pdf_report import generate_pdf_report
+from backend.services.pdf_report import generate_pdf_report
 import uuid
 
 router = APIRouter()

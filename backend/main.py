@@ -1,12 +1,12 @@
 from fastapi import FastAPI
-from models.db import Base, engine
-from api.upload import router as upload_router
-from models.clause import Clause
-from api.analysis import router as analysis_router
+from backend.models.db import Base, engine
+from backend.api.upload import router as upload_router
+from backend.models.clause import Clause
+from backend.api.analysis import router as analysis_router
 from fastapi.middleware.cors import CORSMiddleware
-from api.contracts import router as contracts_router
-from api.admin import router as admin_router
-from api.auth import router as auth_router
+from backend.api.contracts import router as contracts_router
+from backend.api.admin import router as admin_router
+from backend.api.auth import router as auth_router
 app = FastAPI()
 
 app.add_middleware(

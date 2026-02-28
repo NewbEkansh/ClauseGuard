@@ -1,5 +1,5 @@
 from celery import Celery
-from config import settings
+from backend.config import settings
 
 celery = Celery(
     "clauseguard",

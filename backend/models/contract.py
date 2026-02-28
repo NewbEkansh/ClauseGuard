@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 import uuid
-from models.db import Base
+from backend.models.db import Base
 from sqlalchemy import Column, Float
 class Contract(Base):
     __tablename__ = "contracts"
