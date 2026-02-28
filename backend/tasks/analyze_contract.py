@@ -1,11 +1,11 @@
-from backend.celery_worker import celery
-from backend.models.db import SessionLocal
-from backend.models.contract import Contract
-from backend.models.clause import Clause
-from backend.services.audit_service import log_event
-from backend.services.pdf_parser import extract_text_from_pdf
-from backend.services.llm_engine import extract_risk_clauses
-from backend.services.clause_retriever import find_relevant_sections
+from celery_worker import celery
+from models.db import SessionLocal
+from models.contract import Contract
+from models.clause import Clause
+from services.audit_service import log_event
+from services.pdf_parser import extract_text_from_pdf
+from services.llm_engine import extract_risk_clauses
+from services.clause_retriever import find_relevant_sections
 
 from celery.utils.log import get_task_logger
 

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Text, DateTime
 from sqlalchemy.dialects.postgresql import UUID
-from backend.models.db import Base
+from models.db import Base
 
 
 class AuditLog(Base):

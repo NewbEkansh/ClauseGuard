@@ -1,4 +1,4 @@
-from backend.models.audit_log import AuditLog
+from models.audit_log import AuditLog
 
 
 def log_event(db, contract_id, action, status, message):

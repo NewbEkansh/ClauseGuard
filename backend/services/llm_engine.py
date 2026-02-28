@@ -1,7 +1,7 @@
 import json
 import re
 from groq import Groq
-from backend.config import settings
+from config import settings
 
 client = Groq(api_key=settings.GROQ_API_KEY)
 
